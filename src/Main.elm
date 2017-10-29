@@ -2,14 +2,16 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Board
+import BoardPosition exposing (BoardPosition)
+import Time
 
 
 type alias Model =
-    { board : Board.BoardState }
+    { board : Board.Board }
 
 
 type Msg
-    = Noop
+    = EvolveBoard
 
 
 main : Program Never Model Msg
@@ -29,19 +31,27 @@ init =
 
 initialModel : Model
 initialModel =
-    Model <| Board.constructBlank 15 15
+    let
+        initialBoard =
+            Board.constructBlank 15 15
+                |> Board.placeAliveCell (BoardPosition 6 6)
+                |> Board.placeAliveCell (BoardPosition 7 7)
+                |> Board.placeAliveCell (BoardPosition 8 7)
+                |> Board.placeAliveCell (BoardPosition 8 8)
+    in
+        Model initialBoard
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Noop ->
-            model ! []
+        EvolveBoard ->
+            { model | board = Board.evolve model.board } ! []
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Time.every Time.second (\_ -> EvolveBoard)
 
 
 view : Model -> Html Msg

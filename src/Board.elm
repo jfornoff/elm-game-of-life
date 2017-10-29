@@ -6,31 +6,31 @@ import Matrix.Extra
 import Html exposing (Html)
 
 
-type alias BoardState =
-    Matrix.Matrix BoardSpace
+type alias Board =
+    Matrix.Matrix Cell
 
 
-type BoardSpace
+type Cell
     = Alive
     | Dead
 
 
-constructBlank : Int -> Int -> BoardState
+constructBlank : Int -> Int -> Board
 constructBlank width height =
     Matrix.repeat width height Dead
 
 
-placeAliveCell : BoardPosition -> BoardState -> BoardState
+placeAliveCell : BoardPosition -> Board -> Board
 placeAliveCell { x, y } oldBoard =
     Matrix.set x y Alive oldBoard
 
 
-placeDeadCell : BoardPosition -> BoardState -> BoardState
+placeDeadCell : BoardPosition -> Board -> Board
 placeDeadCell { x, y } oldBoard =
     Matrix.set x y Dead oldBoard
 
 
-isDeadCell : BoardPosition -> BoardState -> Bool
+isDeadCell : BoardPosition -> Board -> Bool
 isDeadCell { x, y } board =
     board
         |> Matrix.get x y
@@ -38,7 +38,7 @@ isDeadCell { x, y } board =
         |> Maybe.withDefault False
 
 
-isAliveCell : BoardPosition -> BoardState -> Bool
+isAliveCell : BoardPosition -> Board -> Bool
 isAliveCell { x, y } board =
     board
         |> Matrix.get x y
@@ -46,13 +46,13 @@ isAliveCell { x, y } board =
         |> Maybe.withDefault False
 
 
-evolve : BoardState -> BoardState
+evolve : Board -> Board
 evolve board =
     board
         |> Matrix.indexedMap (evolveCell board)
 
 
-evolveDead : List BoardSpace -> BoardSpace
+evolveDead : List Cell -> Cell
 evolveDead neighbors =
     neighbors
         |> List.filter (\space -> space == Alive)
@@ -64,7 +64,7 @@ evolveDead neighbors =
                 Dead
 
 
-evolveAlive : List BoardSpace -> BoardSpace
+evolveAlive : List Cell -> Cell
 evolveAlive neighbors =
     neighbors
         |> List.filter (\space -> space == Alive)
@@ -78,7 +78,7 @@ evolveAlive neighbors =
                 Dead
 
 
-evolveCell : BoardState -> Int -> Int -> BoardSpace -> BoardSpace
+evolveCell : Board -> Int -> Int -> Cell -> Cell
 evolveCell board x y self =
     let
         neighbors =
@@ -92,6 +92,6 @@ evolveCell board x y self =
                 evolveAlive neighbors
 
 
-print : BoardState -> Html msg
+print : Board -> Html msg
 print =
     Matrix.Extra.prettyPrint
