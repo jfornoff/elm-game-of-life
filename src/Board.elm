@@ -1,10 +1,11 @@
-module Board exposing (..)
+module Board exposing (Board, Msg(..), view, update, placeAliveCell, constructBlank)
 
 import BoardPosition exposing (..)
 import Matrix
 import Matrix.Extra
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Array
 import List.Extra
 
@@ -16,6 +17,12 @@ type alias Board =
 type Cell
     = Alive
     | Dead
+
+
+type Msg
+    = Evolve
+    | KillCell BoardPosition
+    | ReviveCell BoardPosition
 
 
 constructBlank : Int -> Int -> Board
@@ -31,6 +38,11 @@ placeAliveCell { x, y } oldBoard =
 placeDeadCell : BoardPosition -> Board -> Board
 placeDeadCell { x, y } oldBoard =
     Matrix.set x y Dead oldBoard
+
+
+placeCell : Cell -> BoardPosition -> Board -> Board
+placeCell cell { x, y } oldBoard =
+    Matrix.set x y cell oldBoard
 
 
 isDeadCell : BoardPosition -> Board -> Bool
@@ -95,22 +107,43 @@ evolveCell board x y self =
                 evolveAlive neighbors
 
 
-viewBoard : Board -> Html msg
-viewBoard board =
+
+-- Update
+
+
+update : Msg -> Board -> Board
+update msg oldBoard =
+    case msg of
+        Evolve ->
+            evolve oldBoard
+
+        KillCell position ->
+            placeDeadCell position oldBoard
+
+        ReviveCell position ->
+            placeAliveCell position oldBoard
+
+
+
+-- View
+
+
+view : Board -> Html Msg
+view board =
     board
         |> Matrix.indexedMap viewTableCell
         |> viewRows
         |> table []
 
 
-viewTableCell : Int -> Int -> Cell -> Html msg
+viewTableCell : Int -> Int -> Cell -> Html Msg
 viewTableCell x y cell =
     case cell of
         Alive ->
-            td [ class "cell alive" ] []
+            td [ class "cell alive", onClick <| KillCell (BoardPosition x y) ] []
 
         Dead ->
-            td [ class "cell" ]
+            td [ class "cell", onClick <| ReviveCell (BoardPosition x y) ]
                 []
 
 

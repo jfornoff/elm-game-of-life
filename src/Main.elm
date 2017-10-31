@@ -1,9 +1,10 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Board exposing (Board, Cell(..))
+import Board exposing (Board)
 import BoardPosition exposing (BoardPosition)
 import Time
+import Html.Events exposing (..)
 
 
 type alias Model =
@@ -11,7 +12,9 @@ type alias Model =
 
 
 type Msg
-    = EvolveBoard
+    = BoardMsg Board.Msg
+    | StartEvolution
+    | StopEvolution
 
 
 main : Program Never Model Msg
@@ -39,20 +42,26 @@ initialModel =
                 |> Board.placeAliveCell (BoardPosition 8 7)
                 |> Board.placeAliveCell (BoardPosition 8 8)
     in
-        { board = initialBoard, evolutionRunning = True }
+        { board = initialBoard, evolutionRunning = False }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        EvolveBoard ->
-            { model | board = Board.evolve model.board } ! []
+        StartEvolution ->
+            { model | evolutionRunning = True } ! []
+
+        StopEvolution ->
+            { model | evolutionRunning = False } ! []
+
+        BoardMsg boardMsg ->
+            { model | board = Board.update boardMsg model.board } ! []
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     if model.evolutionRunning then
-        Time.every Time.second (\_ -> EvolveBoard)
+        Time.every Time.second (\_ -> BoardMsg Board.Evolve)
     else
         Sub.none
 
@@ -60,5 +69,14 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div []
-        [ Board.viewBoard model.board
+        [ Html.map BoardMsg <| Board.view model.board
+        , evolutionToggle model
         ]
+
+
+evolutionToggle : Model -> Html Msg
+evolutionToggle model =
+    if model.evolutionRunning then
+        button [ onClick StopEvolution ] [ text "Stop" ]
+    else
+        button [ onClick StartEvolution ] [ text "Start" ]
