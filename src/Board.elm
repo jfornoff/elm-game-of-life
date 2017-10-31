@@ -52,11 +52,6 @@ placeDeadCell { x, y } oldBoard =
     Matrix.set x y Dead oldBoard
 
 
-placeCell : Cell -> BoardPosition -> Board -> Board
-placeCell cell { x, y } oldBoard =
-    Matrix.set x y cell oldBoard
-
-
 isDeadCell : BoardPosition -> Board -> Bool
 isDeadCell { x, y } board =
     board
