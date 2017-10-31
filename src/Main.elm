@@ -4,6 +4,7 @@ import Html exposing (..)
 import Board exposing (Board)
 import BoardPosition exposing (BoardPosition)
 import Time
+import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 
 
@@ -68,7 +69,7 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div []
+    div [ id "app-content" ]
         [ Html.map BoardMsg <| Board.view model.board
         , evolutionToggle model
         ]
@@ -76,7 +77,11 @@ view model =
 
 evolutionToggle : Model -> Html Msg
 evolutionToggle model =
-    if model.evolutionRunning then
-        button [ onClick StopEvolution ] [ text "Stop" ]
-    else
-        button [ onClick StartEvolution ] [ text "Start" ]
+    let
+        ( buttonClass, buttonAction, buttonText ) =
+            if model.evolutionRunning then
+                ( "on", StopEvolution, "Stop" )
+            else
+                ( "off", StartEvolution, "Start" )
+    in
+        button [ id "evolution-toggle", class buttonClass, onClick buttonAction ] [ text buttonText ]
