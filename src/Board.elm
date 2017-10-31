@@ -1,4 +1,16 @@
-module Board exposing (Board, Msg(..), view, update, placeAliveCell, constructBlank)
+module Board
+    exposing
+        ( Board
+        , Msg(..)
+        , view
+        , update
+        , placeAliveCell
+        , placeDeadCell
+        , isAliveCell
+        , isDeadCell
+        , evolve
+        , constructBlank
+        )
 
 import BoardPosition exposing (..)
 import Matrix
