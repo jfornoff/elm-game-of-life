@@ -3,7 +3,10 @@ module Board exposing (..)
 import BoardPosition exposing (..)
 import Matrix
 import Matrix.Extra
-import Html exposing (Html)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Array
+import List.Extra
 
 
 type alias Board =
@@ -92,6 +95,28 @@ evolveCell board x y self =
                 evolveAlive neighbors
 
 
-print : Board -> Html msg
-print =
-    Matrix.Extra.prettyPrint
+viewBoard : Board -> Html msg
+viewBoard board =
+    board
+        |> Matrix.indexedMap viewTableCell
+        |> viewRows
+        |> table []
+
+
+viewTableCell : Int -> Int -> Cell -> Html msg
+viewTableCell x y cell =
+    case cell of
+        Alive ->
+            td [ class "cell alive" ] []
+
+        Dead ->
+            td [ class "cell" ]
+                []
+
+
+viewRows : Matrix.Matrix (Html msg) -> List (Html msg)
+viewRows cellMatrix =
+    cellMatrix.data
+        |> Array.toList
+        |> List.Extra.groupsOf (Matrix.width cellMatrix)
+        |> List.map (tr [])

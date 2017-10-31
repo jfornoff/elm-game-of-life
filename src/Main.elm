@@ -1,13 +1,13 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Board
+import Board exposing (Board, Cell(..))
 import BoardPosition exposing (BoardPosition)
 import Time
 
 
 type alias Model =
-    { board : Board.Board }
+    { board : Board, evolutionRunning : Bool }
 
 
 type Msg
@@ -39,7 +39,7 @@ initialModel =
                 |> Board.placeAliveCell (BoardPosition 8 7)
                 |> Board.placeAliveCell (BoardPosition 8 8)
     in
-        Model initialBoard
+        { board = initialBoard, evolutionRunning = True }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -51,11 +51,14 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Time.every Time.second (\_ -> EvolveBoard)
+    if model.evolutionRunning then
+        Time.every Time.second (\_ -> EvolveBoard)
+    else
+        Sub.none
 
 
 view : Model -> Html Msg
 view model =
     div []
-        [ Board.print model.board
+        [ Board.viewBoard model.board
         ]
